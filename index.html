@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGD - Avaliação com Média Automática</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f0; display: flex; justify-content: center; padding: 20px; }
+        .container { background-color: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); max-width: 750px; width: 100%; }
+        h2 { color: #1b4d3e; text-align: center; border-bottom: 3px solid #1b4d3e; padding-bottom: 10px; }
+        
+        .painel-sintese {
+            background-color: #1b4d3e;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .valor-media { font-size: 24px; font-weight: bold; }
+
+        .campo-militar { margin-bottom: 20px; padding: 15px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 5px; }
+        
+        .grid-competencias {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            background-color: #fafafa;
+            padding: 15px;
+            border: 1px solid #ddd;
+        }
+        .item-competencia {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            padding: 5px 10px;
+            border: 1px solid #eee;
+        }
+        .item-competencia label { font-size: 0.7em; text-transform: uppercase; flex: 1; }
+        .nota-input { width: 65px; font-weight: bold; text-align: center; padding: 5px; border: 1px solid #ccc; }
+
+        .btn-enviar {
+            width: 100%; padding: 15px; background-color: #1b4d3e; color: white;
+            border: none; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold; margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Sistema de Gestão do Desempenho</h2>
+
+    <div class="painel-sintese">
+        <span>SÍNTESE DO DESEMPENHO (MÉDIA):</span>
+        <span class="valor-media" id="displayMedia">0.0</span>
+    </div>
+    
+    <form id="formAvaliacao">
+        <div class="campo-militar">
+            <label>Militar Avaliado:</label>
+            <select id="militar" onchange="trocarMilitar()" required>
+                <option value="">Selecione...</option>
+                <option value="Fulano">1º Sgt Fulano</option>
+                <option value="Cicrano">2º Sgt Cicrano</option>
+                <option value="Beltrano">2º Sgt Beltrano</option>
+            </select>
+        </div>
+
+        <div id="secaoNotas" style="opacity: 0.4; pointer-events: none;">
+            <div class="grid-competencias" id="gridNotas">
+                <div class="item-competencia"><label>Autoaperfeiçoamento</label><input type="number" id="auto" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Camaradagem</label><input type="number" id="cama" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Comunicação</label><input type="number" id="comu" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Conhecimento Inst.</label><input type="number" id="inst" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Coragem Moral</label><input type="number" id="cora" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Criatividade</label><input type="number" id="cria" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Cultura Geral</label><input type="number" id="cult" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Dedicação</label><input type="number" id="dedi" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Direção e Controle</label><input type="number" id="dire" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Disciplina</label><input type="number" id="disc" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Discrição</label><input type="number" id="discr" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Estabilidade Emoc.</label><input type="number" id="esta" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Flexibilidade</label><input type="number" id="flex" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Iniciativa</label><input type="number" id="inic" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Integridade</label><input type="number" id="inte" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Liderança</label><input type="number" id="lide" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Objetividade</label><input type="number" id="obje" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Persistência</label><input type="number" id="pers" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Postura/Apres.</label><input type="number" id="post" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Produtividade</label><input type="number" id="prod" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Resistência Física</label><input type="number" id="resi" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Responsabilidade</label><input type="number" id="resp" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Sociabilidade</label><input type="number" id="soci" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Tato</label><input type="number" id="tato" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Técnico-Prof.</label><input type="number" id="tecn" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+                <div class="item-competencia"><label>Zelo</label><input type="number" id="zelo" class="nota-input" min="1" max="10" step="0.1" oninput="calcularMedia()"></div>
+            </div>
+            <button type="button" class="btn-enviar" onclick="finalizar()">Confirmar Avaliação Final</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    let memoria = { "Fulano": {}, "Cicrano": {}, "Beltrano": {} };
+    let militarAnterior = "";
+
+    function trocarMilitar() {
+        const atual = document.getElementById('militar').value;
+        const inputs = document.querySelectorAll('.nota-input');
+        const secao = document.getElementById('secaoNotas');
+
+        if (militarAnterior) {
+            inputs.forEach(i => memoria[militarAnterior][i.id] = i.value);
+        }
+
+        if (atual === "") {
+            secao.style.opacity = "0.4"; secao.style.pointerEvents = "none";
+            inputs.forEach(i => i.value = "");
+        } else {
+            secao.style.opacity = "1"; secao.style.pointerEvents = "auto";
+            inputs.forEach(i => i.value = memoria[atual][i.id] || "");
+        }
+        militarAnterior = atual;
+        calcularMedia();
+    }
+
+    function calcularMedia() {
+        const inputs = document.querySelectorAll('.nota-input');
+        let soma = 0;
+        let preenchidos = 0;
+
+        inputs.forEach(i => {
+            if (i.value !== "") {
+                soma += parseFloat(i.value);
+                preenchidos++;
+            }
+        });
+
+        const media = preenchidos > 0 ? (soma / preenchidos).toFixed(1) : "0.0";
+        document.getElementById('displayMedia').innerText = media;
+    }
+
+    function finalizar() {
+        const m = document.getElementById('militar').value;
+        const mediaFinal = document.getElementById('displayMedia').innerText;
+        if(confirm(`Confirmar Avaliação de ${m} com média ${mediaFinal}?`)) {
+            alert("Avaliação Concluída!");
+            location.reload(); // Reseta tudo
+        }
+    }
+</script>
+</body>
+</html>
